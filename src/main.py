@@ -21,6 +21,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.impute import SimpleImputer
 
 combined_data_path = "./data/output/2018data.csv"
+# Data from https://gbfs.capitalbikeshare.com/gbfs/en/station_information.json
+station_info_path = './data/station_information.json'
 
 def prepare_data():
     # Get all months data and combine them
@@ -53,8 +55,7 @@ def extract_date_features(df, holidays):
     return df
 
 def get_station_data(df):
-    # Data from https://gbfs.capitalbikeshare.com/gbfs/en/station_information.json
-    stations_info = pd.read_json('./data/station_information.json')
+    stations_info = pd.read_json(station_info_path)
     # Convet to data frame
     stations_info = pd.DataFrame(stations_info['data']['stations'])
 
@@ -69,11 +70,47 @@ def get_station_data(df):
     df = pd.merge(df, stations_info, on="station")
 
     # Replace stations ids with index number
-    stations_ids = sorted(df['station'].unique())
-    stations_ids = {k: v for v, k in enumerate(stations_ids)}
-    stations_ids
-    df = df.replace({'station': stations_ids})
-    df.head()
+    # stations_ids = sorted(df['station'].unique())
+    # stations_ids = {k: v for v, k in enumerate(stations_ids)}
+    # stations_ids
+    # df = df.replace({'station': stations_ids})
+
+    return df
+
+def general_visualization(df):
+    # Seasons
+    df.season.value_counts()
+    sns.catplot(x='season',data=df,kind='count',height=5,aspect=1)
+
+    # Holidays
+    df.holiday.value_counts()
+    sns.catplot(x='holiday',data=df,kind='count',height=5,aspect=1)
+    # Discard (Biasing)
+
+    # Weekend
+    df.weekend.value_counts()
+    sns.catplot(x='weekend',data=df,kind='count',height=5,aspect=1)
+
+    # Working day
+    df.workingday.value_counts()
+    sns.catplot(x='workingday',data=df,kind='count',height=5,aspect=1)
+
+    # Day of week
+    df.day_of_week.value_counts()
+    sns.catplot(x='day_of_week',data=df,kind='count',height=5,aspect=1)
+
+    # Day of month
+    df.day.value_counts()
+    sns.catplot(x='day',data=df,kind='count',height=5,aspect=1)
+
+    # Month
+    df.month.value_counts()
+    sns.catplot(x='month',data=df,kind='count',height=5,aspect=1)
+
+    # Hour
+    df.hour.value_counts()
+    sns.catplot(x='hour',data=df,kind='count',height=5,aspect=1)
+    
 
 if __name__ == "__main__":
     df = prepare_data()
@@ -105,6 +142,11 @@ if __name__ == "__main__":
     df = extract_date_features(df, holidays)
     df.head(100)
     df.pop('date')
+
+    df = get_station_data(df)
+    df.head()
+
+    general_visualization(df)
 
 # df.info()
 # df.head()
